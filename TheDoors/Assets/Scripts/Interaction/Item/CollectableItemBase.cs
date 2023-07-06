@@ -8,13 +8,9 @@ public class CollectableItemBase : InteractableBase
 
     public InventoryItem ItemData => itemData;
 
-    public override void StartHover(GameObject interactor)
+    protected override float InfoSizeMultiplier()
     {
-        if (!isActive)
-            return;
-
-        OutlineActive();
-        InfoText.SetVisibleInstance(transform, ItemName(), itemData.itemSO.infoTextSizeMultiplier);
+        return  itemData.itemSO.infoTextSizeMultiplier;
     }
 
     protected override void OnInteract(GameObject interactor)

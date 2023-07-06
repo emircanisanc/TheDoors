@@ -105,6 +105,13 @@ public class Inventory : MonoBehaviour
         return true;
     }
 
+    public List<InventoryItem> FindItems(string itemName)
+    {
+        List<InventoryItem> selectedItems = items.FindAll(x => x.itemSO.itemName == itemName);
+
+        return selectedItems;
+    }
+
     # endregion
 
 }

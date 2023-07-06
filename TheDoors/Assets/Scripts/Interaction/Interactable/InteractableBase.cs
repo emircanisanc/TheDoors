@@ -10,6 +10,7 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
 
 
     protected abstract string ItemName();
+    protected abstract float InfoSizeMultiplier();
 
     /// <summary>
     /// Start the hover effect for the interactor.
@@ -21,7 +22,7 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
             return;
 
         OutlineActive();
-        InfoText.SetVisibleInstance(transform, ItemName(), 1);
+        InfoText.SetVisibleInstance(transform, ItemName(), InfoSizeMultiplier());
     }
 
     /// <summary>

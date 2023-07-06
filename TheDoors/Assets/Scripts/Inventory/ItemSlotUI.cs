@@ -80,6 +80,7 @@ public class ItemSlotUI : MonoBehaviour
             if (itemInSlot.itemSO.isConsumeable)
             {
                 fuelBar.SetActive(true);
+                UpdateFuelAmount(itemInSlot.CurrentFuel);
                 itemInSlot.OnItemFuelChanged += UpdateFuelAmount;
             }
             else

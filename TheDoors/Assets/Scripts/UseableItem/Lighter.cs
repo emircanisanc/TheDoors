@@ -2,16 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Flashlight : UseableItemBase
+public class Lighter : UseableItemBase
 {
     [SerializeField] GameObject _light;
 
     public override void SetActive()
     {
-        if (itemData.CurrentFuel <= 0)
-            return;
-        
-        isActive = true;
+        base.SetActive();
         _light.SetActive(true);
     }
 
@@ -33,13 +30,13 @@ public class Flashlight : UseableItemBase
 
             float amountToReduce = Time.deltaTime * itemData.itemSO.fuelSpendMultiplier;
             itemData.CurrentFuel = Mathf.Max(0, itemData.CurrentFuel - amountToReduce);
+            itemData.OnItemFuelChanged?.Invoke(itemData.CurrentFuel);
         }
         else
         {
-            if (_light.activeSelf)
-                SetDeactive();
-
+            isActive = false;
+            itemData.OnItemDestroyed?.Invoke(itemData);
+            Destroy(gameObject);
         }
     }
-    
 }

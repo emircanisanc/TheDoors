@@ -16,10 +16,7 @@ public class ItemSO : ScriptableObject
     /// </summary>
     public bool isConsumeable;
 
-    /// <summary>
-    /// The maximum consume amount for the item.
-    /// </summary>
-    public float maxConsumeAmount;
+    public float fuelSpendMultiplier;
 
     /// <summary>
     /// The inventory icon sprite for the item.
