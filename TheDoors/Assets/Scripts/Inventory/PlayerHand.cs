@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
 
@@ -10,90 +8,95 @@ public class PlayerHand : MonoBehaviour
     
     public Action <int> OnActiveItemChanged;
 
+    float nextUseItemTime;
+    int currentItemIndex = -1;
     UseableItemBase itemOnHand;
-    int currentItemIndex;
 
     void Awake()
     {
         itemOnHand = null;
-
-        inventory.OnItemAdded += CheckOnHandItem;
     }
 
     void Update()
     {
-        float scrollInput = Input.GetAxis("Mouse ScrollWheel");
-        if (scrollInput > 0)
-            ChangeActiveItemSlot(currentItemIndex + 1);
-        else if (scrollInput < 0)
-            ChangeActiveItemSlot(currentItemIndex - 1);
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            ChangeItem(0);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            ChangeItem(1);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            ChangeItem(2);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            ChangeItem(3);
+        }
 
         if (Input.GetMouseButtonDown(0))
         {
-            UseCurrentlyHeldObject();
+            if (Time.time >= nextUseItemTime)
+            {
+                nextUseItemTime = Time.time + 0.3f;
+                if (itemOnHand != null)
+                {
+                    itemOnHand.ToggleActive();
+                }
+            }
+            
         }
     }
 
-    private void UseCurrentlyHeldObject()
+    public void ChangeItem(int index)
     {
-        if (itemOnHand == null)
+        InventoryItem itemData;
+
+        if (currentItemIndex == index)
+        {
+            if (itemOnHand == null)
+            {
+                if (inventory.TryGetItem(index, out itemData))
+                {
+                    GameObject obj = Instantiate(itemData.itemSO.pfOnHand, itemAttachSocket);
+                    itemOnHand = obj.GetComponent<UseableItemBase>();
+                    itemOnHand.InitializeItem(itemData);
+                    currentItemIndex = index;
+                }
+                else
+                {
+                    currentItemIndex = -1;
+                }
+                OnActiveItemChanged?.Invoke(currentItemIndex);
+            }
+            else
+            {
+                Destroy(itemOnHand.gameObject);
+                currentItemIndex = -1;
+                OnActiveItemChanged?.Invoke(currentItemIndex);
+            }
             return;
+        }
 
-        itemOnHand.UseItem(gameObject);
-    }
-
-    private void CheckOnHandItem(InventoryItem item, int itemSlot)
-    {
-        if (itemOnHand)
-            return;
-
-        if (currentItemIndex != itemSlot)
-            return;
-        
-        SpawnItemAndUseIt(item);
-
-    }
-
-    private void ChangeActiveItemSlot(int itemSlot)
-    {
-        if (itemSlot >= inventory.InventorySlot)
-            currentItemIndex = 0;
-        else if (itemSlot < 0)
-            currentItemIndex = inventory.InventorySlot - 1;
-        else
-            currentItemIndex = itemSlot;
-
-        OnActiveItemChanged?.Invoke(currentItemIndex);
-
-        if (itemOnHand)
+        if (itemOnHand != null)
         {
             Destroy(itemOnHand.gameObject);
-            TryUseItemAt(currentItemIndex);
+        }
+
+        if (inventory.TryGetItem(index, out itemData))
+        {
+            GameObject obj = Instantiate(itemData.itemSO.pfOnHand, itemAttachSocket);
+            itemOnHand = obj.GetComponent<UseableItemBase>();
+            itemOnHand.InitializeItem(itemData);
+            currentItemIndex = index;
         }
         else
         {
-            TryUseItemAt(currentItemIndex);
+            currentItemIndex = -1;
         }
-    }
-
-    private void TryUseItemAt(int itemSlot)
-    {
-        InventoryItem inventoryItem;
-        if (inventory.GetItem(itemSlot, out inventoryItem))
-        {
-            currentItemIndex = itemSlot;
-            SpawnItemAndUseIt(inventoryItem);
-            return;
-        }
-        itemOnHand = null;
-    }
-
-    private void SpawnItemAndUseIt(InventoryItem item)
-    {
-        GameObject itemOnHandPrefab = Instantiate(item.itemSO.pfOnHand, itemAttachSocket);
-        itemOnHand = itemOnHandPrefab.GetComponent<UseableItemBase>();
-
-        itemOnHand.Initialize(item);
+        OnActiveItemChanged?.Invoke(currentItemIndex);
     }
     
 }

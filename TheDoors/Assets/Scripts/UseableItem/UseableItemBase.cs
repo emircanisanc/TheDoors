@@ -4,15 +4,37 @@ using UnityEngine;
 
 public class UseableItemBase : MonoBehaviour
 {
-    InventoryItem item;
+    protected bool isActive;
+    protected InventoryItem itemData;
 
-    public virtual void Initialize(InventoryItem item)
+    public void ToggleActive()
     {
-        this.item = item;
+        if (isActive)
+            SetDeactive();
+        else
+            SetActive();
     }
 
-    public virtual void UseItem(GameObject user)
+    public virtual void SetActive()
     {
-        Debug.Log(user.name + " used a " + item.itemSO.itemName);
+        isActive = true;
+    }
+
+    public virtual void SetDeactive()
+    {
+        isActive = false;
+    }
+
+    public void InitializeItem(InventoryItem itemData)
+    {
+        this.itemData = itemData;
+    }
+
+    protected virtual void Update()
+    {
+        if (!isActive)
+            return;
+
+        Debug.Log("Item is working!");
     }
 }

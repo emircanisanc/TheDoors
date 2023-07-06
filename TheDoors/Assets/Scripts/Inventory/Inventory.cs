@@ -11,7 +11,7 @@ public class Inventory : MonoBehaviour
     [SerializeField] int inventorySlot = 3;
     [SerializeField][Min(0)] int currentGold = 0;
 
-    public Action<InventoryItem, int> OnItemAdded;
+    public Action<List<InventoryItem>> OnInventoryChanged;
     public Action<int> OnGoldAmountChanged;
 
     /// <summary>
@@ -28,10 +28,6 @@ public class Inventory : MonoBehaviour
     {
         if (items == null)
             items = new List<InventoryItem>();
-
-        int emptyAmount = InventorySlot - items.Count;
-        for (int i = 0; i < emptyAmount; i++)
-            items.Add(null);
     }
 
     #region GOLD
@@ -73,123 +69,42 @@ public class Inventory : MonoBehaviour
 
     #endregion
 
-    #region ITEM
 
-    public bool GetItem(int slotIndex, out InventoryItem inventoryItem)
+    # region ITEM
+
+    public bool AddItem(InventoryItem item)
     {
-        if (slotIndex >= InventorySlot || slotIndex < 0 || slotIndex >= items.Count)
+        if (items.Count >= InventorySlot)
         {
-            inventoryItem = new InventoryItem();
+            // DISPLAY ERROR MESSAGE
             return false;
         }
 
-        inventoryItem = items[slotIndex];
-
-        return inventoryItem != null && inventoryItem.itemSO != null;
-
-    }
-
-    /// <summary>
-    /// Adds an item to the inventory.
-    /// </summary>
-    /// <param name="item">The item to add.</param>
-    /// <returns>The remaining stack amount that could not be added to the inventory.</returns>
-    public int AddItem(InventoryItem item)
-    {
-        if (item.itemSO.isStackable)
-        {
-            // Check if the item is stackable
-            for (int i = 0; i < items.Count; i++)
-            {
-                InventoryItem inventoryItem = items[i];
-                // Find an existing stack with the same item
-                if (inventoryItem.itemSO != null && inventoryItem.itemSO.itemName == item.itemSO.itemName)
-                {
-                    int amountToAdd = item.currentStack;
-                    int currentStack = inventoryItem.currentStack;
-                    int maxStack = item.itemSO.maxStack;
-
-                    int spaceLeftInStack = maxStack - currentStack;
-                    // Calculate the amount that can be added to the existing stack
-                    int amountAdded = Mathf.Min(amountToAdd, spaceLeftInStack);
-                    inventoryItem.currentStack += amountAdded;
-                    item.currentStack -= amountAdded;
-
-                    OnItemAdded?.Invoke(inventoryItem, i);
-
-                    if (item.currentStack <= 0)
-                    {
-                        // Item fully added to an existing stack
-                        return 0;
-                    }
-                }
-            }
-
-            if (item.currentStack > 0)
-            {
-                if (items.Count < inventorySlot)
-                {
-                    AddNewStack(item);
-                    return 0;
-                }
-                else
-                {
-                    // Find an empty slot and add the item
-                    int emptySlotIndex = FindEmptySlot();
-                    if (emptySlotIndex != -1)
-                    {
-                        items[emptySlotIndex] = item;
-                        OnItemAdded?.Invoke(item, emptySlotIndex);
-                        return 0;
-                    }
-                }
-            }
-
-            // Inventory is full or no empty slot available, return remaining stack amount
-            return item.currentStack;
-        }
-        else
-        {
-            if (items.Count < inventorySlot)
-            {
-                AddNewStack(item);
-                return 0;
-            }
-            else
-            {
-                // Find an empty slot and add the item
-                int emptySlotIndex = FindEmptySlot();
-                if (emptySlotIndex != -1)
-                {
-                    items[emptySlotIndex] = item;
-                    OnItemAdded?.Invoke(item, emptySlotIndex);
-                    return 0;
-                }
-            }
-
-            // Inventory is full or no empty slot available, return the current stack amount
-            return item.currentStack;
-        }
-    }
-
-    private int FindEmptySlot()
-    {
-        for (int i = 0; i < items.Count; i++)
-        {
-            if (items[i] == null)
-                return i;
-            if (items[i].itemSO == null)
-                return i;
-        }
-        return -1; // No empty slot found
-    }
-
-    private void AddNewStack(InventoryItem item)
-    {
         items.Add(item);
-        OnItemAdded?.Invoke(items[items.Count - 1], items.Count - 1);
+        item.OnItemDestroyed += RemoveItem;
+        OnInventoryChanged?.Invoke(items);
+        return true;
     }
 
+    public void RemoveItem(InventoryItem item)
+    {
+        int index = items.FindIndex(x => x == item);
+        items.RemoveAt(index);
 
-    #endregion
+        OnInventoryChanged?.Invoke(items);
+    }
+
+    public bool TryGetItem(int index, out InventoryItem itemData)
+    {
+        itemData = null;
+
+        if (index >= items.Count)
+            return false;
+
+        itemData = items[index];
+        return true;
+    }
+
+    # endregion
+
 }

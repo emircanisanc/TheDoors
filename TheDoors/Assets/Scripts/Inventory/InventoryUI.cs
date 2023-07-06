@@ -19,71 +19,76 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] TextMeshProUGUI tmpGold;
 
     List<ItemSlotUI> itemSlots;
-    int lastHoverSlot;
+    int lastHoverSlot = -1;
 
     void Awake() 
     {
         itemSlots = new List<ItemSlotUI>();
-        lastHoverSlot = 0;
 
         inventorySlotTemp.SetActive(false);
-
-        UpdateSlotAmount(inventory.InventorySlot);
-        UpdateGoldAmount(inventory.CurrentGold);
-        UpdateHoverItem(0);
-
-        inventory.OnItemAdded += UpdateSlot;
-        inventory.OnGoldAmountChanged += UpdateGoldAmount;
-        playerHand.OnActiveItemChanged += UpdateHoverItem;
     }
 
-    private void UpdateSlotAmount(int slotAmount)
+    void Start()
     {
-        ClearSlots();
+        CreateSlots(inventory.InventorySlot);
+        UpdateGoldAmount(inventory.CurrentGold);
+
+        inventory.OnGoldAmountChanged += UpdateGoldAmount;
+        inventory.OnInventoryChanged += UpdateSlots;
+
+        playerHand.OnActiveItemChanged += UpdateHoverItem;    
+    }
+
+    private void CreateSlots(int slotAmount)
+    {
 
         for (int i = 0; i < slotAmount; i ++)
         {
             GameObject slot = Instantiate(inventorySlotTemp, inventorySlotTemp.transform.parent);
-            slot.SetActive(true);
             itemSlots.Add(slot.GetComponent<ItemSlotUI>());
         }
 
         Vector2 lastSize = inventoryBackgroundRectTransform.sizeDelta;
         float x = itemSlots.Count * inventorySlotX + (itemSlots.Count + 1) * spaceBetweenSlots;
-        inventoryBackgroundRectTransform.sizeDelta = new Vector2(x, lastSize.y);
+        inventoryBackgroundRectTransform.sizeDelta = new Vector2(x + 20, lastSize.y);
     }
 
-    private void ClearSlots()
+    private void UpdateSlots(List<InventoryItem> items)
     {
-        if (itemSlots == null)
-            return;
-
-        for (int i = 0; i < itemSlots.Count; i++)
+        for (int i = 0; i < itemSlots.Count; i ++)
         {
-            Destroy(itemSlots[i].gameObject);
+            itemSlots[i].SetSlotIndex(i + 1);
+            
+            if (items.Count > i)
+                itemSlots[i].InitSlotItem(items[i]);
+            else
+                itemSlots[i].InitSlotItem(null);
+
         }
 
-        itemSlots.Clear();
+        Vector2 lastSize = inventoryBackgroundRectTransform.sizeDelta;
+        float x = items.Count * inventorySlotX + (itemSlots.Count + 1) * spaceBetweenSlots;
+        inventoryBackgroundRectTransform.sizeDelta = new Vector2(x + 20, lastSize.y);
     }
 
-    private void UpdateSlot(InventoryItem item, int index)
+    private void UpdateHoverItem(int index)
     {
-        ItemSlotUI itemSlot = itemSlots[index];
-        if (item == null)
+        if (index != lastHoverSlot)
         {
-            itemSlot.SetIcon(null); // Clear the icon if item is null
-            itemSlot.SetStackAmount(0); // Clear the stack amount if item is null
-            return;
+            if (itemSlots.Count > lastHoverSlot && lastHoverSlot >= 0)
+                itemSlots[lastHoverSlot].CloseHover();
+
+            if (itemSlots.Count > index && index >= 0)
+                itemSlots[index].OpenHover();
+        }
+        else
+        {
+            if (itemSlots.Count > lastHoverSlot && lastHoverSlot >= 0)
+                itemSlots[lastHoverSlot].ToggleHover();
         }
 
-        if (item.itemSO == null)
-        {
-            itemSlot.SetIcon(null); // Clear the icon if item is null
-            itemSlot.SetStackAmount(0); // Clear the stack amount if item is null
-            return;
-        }   
-        itemSlot.SetIcon(item.itemSO.inventoryIcon); // Set the icon of the item
-        itemSlot.SetStackAmount(item.currentStack); // Set the stack amount of the item
+        lastHoverSlot = index;
+        
     }
 
     private void UpdateGoldAmount(int goldAmount)
@@ -91,11 +96,4 @@ public class InventoryUI : MonoBehaviour
         tmpGold.SetText(goldAmount.ToString()); // Update the text displaying the gold amount
     }
 
-    private void UpdateHoverItem(int hoverSlot)
-    {
-        itemSlots[lastHoverSlot].CloseHover();
-        
-        lastHoverSlot = hoverSlot;
-        itemSlots[lastHoverSlot].OpenHover();
-    }
 }

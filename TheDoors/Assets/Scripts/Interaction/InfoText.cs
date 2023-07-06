@@ -19,6 +19,7 @@ public class InfoText : MonoBehaviour
 
     Transform cameraTransform;
     Transform objTransform;
+    float sizeMultiplier;
 
     Canvas canvas;
 
@@ -28,8 +29,6 @@ public class InfoText : MonoBehaviour
             instance = this;
         else
             Destroy(gameObject);
-
-        tmpItemName = GetComponentInChildren<TextMeshProUGUI>();
 
         cameraTransform = Camera.main.transform;
 
@@ -43,11 +42,12 @@ public class InfoText : MonoBehaviour
     /// </summary>
     /// <param name="transform">The transform of the interactable item.</param>
     /// <param name="itemName">The name of the item to display.</param>
-    private void SetVisible(Transform transform, string itemName)
+    private void SetVisible(Transform transform, string itemName, float sizeMultiplier)
     {
         objTransform = transform;
         tmpItemName.SetText(itemName);
         gameObject.SetActive(true);
+        this.sizeMultiplier = sizeMultiplier;
     }
 
     /// <summary>
@@ -69,10 +69,10 @@ public class InfoText : MonoBehaviour
     /// </summary>
     /// <param name="transform">The transform of the interactable item.</param>
     /// <param name="itemName">The name of the item to display.</param>
-    public static void SetVisibleInstance(Transform transform, string itemName)
+    public static void SetVisibleInstance(Transform transform, string itemName, float sizeMultiplier)
     {
         if (instance)
-            instance.SetVisible(transform, itemName);
+            instance.SetVisible(transform, itemName, sizeMultiplier);
         else
             PrintErrorLog();
     }
@@ -98,7 +98,7 @@ public class InfoText : MonoBehaviour
 
             // Set the scale based on the distance
             float scale = Mathf.Lerp(minScale, maxScale, Mathf.InverseLerp(minDistance, maxDistance, distance));
-            canvas.transform.localScale = Vector3.one * scale;
+            canvas.transform.localScale = Vector3.one * scale * sizeMultiplier;
 
             // Face the object to the camera (in reverse)
             canvas.transform.rotation = Quaternion.LookRotation(canvas.transform.position - cameraTransform.position);

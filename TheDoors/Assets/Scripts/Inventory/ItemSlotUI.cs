@@ -4,16 +4,24 @@ using TMPro;
 
 public class ItemSlotUI : MonoBehaviour
 {
-    [SerializeField] GameObject hoverImage;
+    [SerializeField] GameObject hoverImageClosed;
+    [SerializeField] GameObject hoverImageOpened;
+    [SerializeField] GameObject fuelBar;
+    [SerializeField] Image barFill;
     [SerializeField] Image itemIcon;
-    [SerializeField] TextMeshProUGUI itemStackText;
+    [SerializeField] TextMeshProUGUI itemSlotIndex;
+
+    InventoryItem itemInSlot;
+
+    public InventoryItem ItemInSlot { get { return itemInSlot; } set { itemInSlot = value; } }
 
     /// <summary>
     /// Opens the hover image.
     /// </summary>
     public void OpenHover()
     {
-        hoverImage.SetActive(true);
+        hoverImageClosed.SetActive(false);
+        hoverImageOpened.SetActive(true);
     }
 
     /// <summary>
@@ -21,7 +29,16 @@ public class ItemSlotUI : MonoBehaviour
     /// </summary>
     public void CloseHover()
     {
-        hoverImage.SetActive(false);
+        hoverImageClosed.SetActive(true);
+        hoverImageOpened.SetActive(false);
+    }
+
+    public void ToggleHover()
+    {
+        if (hoverImageClosed.activeSelf)
+            OpenHover();
+        else
+            CloseHover();
     }
 
     /// <summary>
@@ -34,19 +51,47 @@ public class ItemSlotUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Sets the stack amount of the item.
+    /// Sets the slot index of the item.
     /// </summary>
-    /// <param name="amount">The stack amount to set.</param>
-    public void SetStackAmount(int amount)
+    /// <param name="index">The stack amount to set.</param>
+    public void SetSlotIndex(int index)
     {
-        if (amount == 0 || amount == 1)
+        itemSlotIndex.SetText(index.ToString());
+    }
+
+    public void InitSlotItem(InventoryItem item)
+    {
+        if (itemInSlot != null)
         {
-            itemStackText.gameObject.SetActive(false);
+            if (itemInSlot.itemSO.isConsumeable)
+            {
+                itemInSlot.OnItemFuelChanged -= UpdateFuelAmount;
+            }
+        }
+
+        if (item == null || item.itemSO == null)
+        {
+            gameObject.SetActive(false);
         }
         else
         {
-            itemStackText.gameObject.SetActive(true);
-            itemStackText.text = amount.ToString();
+            gameObject.SetActive(true);
+            itemInSlot = item;
+            if (itemInSlot.itemSO.isConsumeable)
+            {
+                fuelBar.SetActive(true);
+                itemInSlot.OnItemFuelChanged += UpdateFuelAmount;
+            }
+            else
+            {
+                fuelBar.SetActive(false);
+            }
+            SetIcon(itemInSlot.itemSO.inventoryIcon);
         }
+    }
+
+    private void UpdateFuelAmount(float amount)
+    {
+        barFill.fillAmount = amount / 100f;
     }
 }

@@ -3,7 +3,8 @@ using UnityEngine;
 /// <summary>
 /// Abstract base class for item scriptable objects.
 /// </summary>
-public abstract class ItemSO : ScriptableObject
+[CreateAssetMenu(menuName = "New Item")]
+public class ItemSO : ScriptableObject
 {
     /// <summary>
     /// The name of the item.
@@ -11,14 +12,14 @@ public abstract class ItemSO : ScriptableObject
     public string itemName;
 
     /// <summary>
-    /// Indicates whether the item is stackable.
+    /// Indicates whether the item is consumeable.
     /// </summary>
-    public bool isStackable;
+    public bool isConsumeable;
 
     /// <summary>
-    /// The maximum stack size for the item.
+    /// The maximum consume amount for the item.
     /// </summary>
-    public int maxStack;
+    public float maxConsumeAmount;
 
     /// <summary>
     /// The inventory icon sprite for the item.
@@ -34,4 +35,7 @@ public abstract class ItemSO : ScriptableObject
     /// The prefab associated with the item on the hand representation.
     /// </summary>
     public GameObject pfOnHand;
+
+    public float infoTextSizeMultiplier = 1;
+
 }
