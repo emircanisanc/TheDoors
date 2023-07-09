@@ -17,19 +17,35 @@ public class Message : MonoBehaviour
     bool isMessageActive;
     Sequence sequence;
 
+    void Awake()
+    {
+        instance = this;    
+    }
+
 
     private void ShowMessage(string message)
     {
-        if (isMessageActive)
+        if (isMessageActive && message != lastString)
         {
-
+            sequence.Kill();
+            tmpMessage.SetText(message);
+            canvasGroup.alpha = 1f;
+            sequence = DOTween.Sequence();
+            sequence.Append(canvasGroup.DOFade(1, 1.5f));
+            sequence.Append(canvasGroup.DOFade(0, 0.5f));
+            sequence.OnComplete(() => isMessageActive = false);
         }
         else
         {
             tmpMessage.SetText(message);
             sequence = DOTween.Sequence();
             sequence.Append(canvasGroup.DOFade(1, 0.5f));
+            sequence.Append(canvasGroup.DOFade(1, 1.5f));
+            sequence.Append(canvasGroup.DOFade(0, 0.5f));
+            sequence.OnComplete(() => isMessageActive = false);
         }
+        isMessageActive = true;
+        lastString = message;
     }
 
 

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5d1c106e82f8954ca069611eaea65a6, type: 3}
+  m_Name: Candle
+  m_EditorClassIdentifier: 
+  itemName: Candle
+  isConsumeable: 1
+  fuelSpendMultiplier: 10
+  inventoryIcon: {fileID: 21300000, guid: 8d98ab6168c3e91439339f1908b8fe97, type: 3}
+  pfWorld: {fileID: 6597568038744562761, guid: 7aa09e65ef0d47b42b8c2cb73e3d9333, type: 3}
+  pfOnHand: {fileID: 5756740157495916349, guid: 15704b8e972ce794fa9dffe11a8c7941,
+    type: 3}
+  infoTextSizeMultiplier: 0.5

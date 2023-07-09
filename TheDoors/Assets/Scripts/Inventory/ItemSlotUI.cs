@@ -10,6 +10,7 @@ public class ItemSlotUI : MonoBehaviour
     [SerializeField] Image barFill;
     [SerializeField] Image itemIcon;
     [SerializeField] TextMeshProUGUI itemSlotIndex;
+    [SerializeField] Gradient fuelGradient;
 
     InventoryItem itemInSlot;
 
@@ -93,6 +94,8 @@ public class ItemSlotUI : MonoBehaviour
 
     private void UpdateFuelAmount(float amount)
     {
-        barFill.fillAmount = amount / 100f;
+        float percent = amount / 100f;
+        barFill.color = fuelGradient.Evaluate(percent);
+        barFill.fillAmount = percent;
     }
 }

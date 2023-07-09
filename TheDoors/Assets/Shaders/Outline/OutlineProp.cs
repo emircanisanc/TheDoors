@@ -4,42 +4,43 @@ namespace Core
 {
     public class OutlineProp : MonoBehaviour
     {
-        [SerializeField] private bool _draggable;
         [SerializeField] private float _outlineWidth;
         [SerializeField] private Color _correctOutlineColor = Color.green;
         [SerializeField] private Color _wrongOutlineColor = Color.red;
         private Color _currentColor;
-        private readonly Color _draggableColor = Color.cyan;
         private Material _outline;
 
         void Start()
         {
-            _outline = Instantiate(GetComponent<Renderer>().sharedMaterial);
-            _outline.SetFloat("_" + "OutlineWidth", _outlineWidth);
+            Renderer renderer = GetComponent<Renderer>();
+            Material[] materials = renderer.sharedMaterials;
 
-            if (_draggable)
-                _outline.SetColor("_OutlineColor", _draggableColor);
+            for (int i = 0; i < materials.Length; i++)
+            {
+                Material material = materials[i];
 
-            _currentColor = _outline.GetColor("_OutlineColor");
-            GetComponent<Renderer>().sharedMaterial = _outline;
+                Material outlineMaterial = Instantiate(material);
+                outlineMaterial.SetFloat("_OutlineWidth", _outlineWidth);
+
+                materials[i] = outlineMaterial;
+            }
+
+            _currentColor = materials[0].GetColor("_OutlineColor");
+
+            renderer.sharedMaterials = materials;
         }
 
-        public void SetDraggableOutline()
-        {
-            _draggable = true;
-            _outline.SetColor("_OutlineColor", _draggableColor);
-        }
 
         public void SetBaseColor()
         {
             _outline.SetColor("_OutlineColor", _currentColor);
         }
-        
+
         public void ChangeColorCorrect()
         {
             _outline.SetColor("_OutlineColor", _correctOutlineColor);
         }
-        
+
         public void ChangeColorWrong()
         {
             _outline.SetColor("_OutlineColor", _wrongOutlineColor);
